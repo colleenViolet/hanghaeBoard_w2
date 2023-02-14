@@ -1,2 +1,4 @@
-package com.sparta.hanghaeboard.controller;public class UserController {
+package com.sparta.hanghaeboard.controller;
+
+public class UserController {
 }
