@@ -41,7 +41,6 @@ public class UserController {
     @ResponseBody
     @PostMapping("/login")
     public StatusResponseDto<String> login(@RequestBody LoginRequestDto loginRequestDto){
-
         return userService.login(loginRequestDto);
     }
 }
