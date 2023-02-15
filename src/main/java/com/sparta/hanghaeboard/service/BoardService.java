@@ -5,6 +5,7 @@ import com.sparta.hanghaeboard.dto.BoardResponseDto;
 import com.sparta.hanghaeboard.dto.StatusResponseDto;
 import com.sparta.hanghaeboard.entity.Board;
 import com.sparta.hanghaeboard.entity.User;
+import com.sparta.hanghaeboard.entity.UserRoleEnum;
 import com.sparta.hanghaeboard.jwt.JwtUtil;
 import com.sparta.hanghaeboard.repository.BoardRepository;
 import com.sparta.hanghaeboard.repository.UserRepository;
@@ -16,9 +17,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -29,100 +30,80 @@ public class BoardService {
     private final JwtUtil jwtUtil;
 
     //게시글 올리기
-    public ResponseEntity<Object> createBoard(BoardRequestDto boardRequestDto, HttpServletRequest request){
-        String token = jwtUtil.resolveToken(request);
-        Claims claims;
+  public StatusResponseDto<BoardResponseDto> createBoard(BoardRequestDto boardRequestDto, HttpServletRequest request){
+      String token = jwtUtil.resolveToken(request);
+      Claims claims;
+      if (token != null){
+          if (jwtUtil.validateToken(token)){
+              claims = jwtUtil.getUserInfoFromToken(token);
+              User user = userRepository.findByUsername(claims.getSubject()).orElseThrow(()-> new NullPointerException("Can not find user Information"));
+              Board board = new Board(boardRequestDto, user);
+              boardRepository.save(board);
 
-        if(token != null){
-            if(jwtUtil.validateToken(token)){
-                claims = jwtUtil.getUserInfoFromToken(token);
-            }else{
-                return ResponseEntity.badRequest().body(new StatusResponseDto(HttpStatus.BAD_REQUEST.value(), "토큰이 유효하지 않습니다."));
-            }
-            Optional<User> found = userRepository.findByUsername(claims.getSubject());
-            if(found.isEmpty()){
-                return ResponseEntity.badRequest().body(new StatusResponseDto(HttpStatus.BAD_REQUEST.value(), "해당 유저가 없습니다."));
-            }
-            Board board = Board.builder()
-                    .user(found.get())
-                    .requestDto(boardRequestDto)
-                    .build();
-            boardRepository.save(board);
-            return ResponseEntity.ok(new BoardResponseDto(board));
-        }else {
-            return ResponseEntity.badRequest().body(new StatusResponseDto(HttpStatus.BAD_REQUEST.value(), "토큰이 없습니다."));
-        }
-    }
+              return StatusResponseDto.success(new BoardResponseDto(board));
+          }
+      }
+      throw new IllegalArgumentException("토큰이 유효하지 않습니다.");
+  }
 
     //전체 게시글 조회
-    @Transactional(readOnly = true)
-    public ResponseEntity<List<BoardResponseDto>> findBoards(){
-        return ResponseEntity.ok(boardRepository.findAllByOrderByModifiedAtDesc()
-                .stream()
-                .map(BoardResponseDto::new)
-                .collect(Collectors.toList()));
+//    @Transactional(readOnly = true)
+    public StatusResponseDto<List<BoardResponseDto>> findBoards(){
+       List<Board> list = boardRepository.findAll();
+       List<BoardResponseDto> boardResponseDtos = new ArrayList<>();
+       for (Board board : list){
+           boardResponseDtos.add(new BoardResponseDto(board));
+       }
+       return StatusResponseDto.success(boardResponseDtos);
     }
 
     //선탹 게시글 조회
-    @Transactional(readOnly = true)
-    public ResponseEntity<BoardResponseDto> findBoard(Long id){
-        Optional<Board> findBoard = boardRepository.findById(id);
-        if (findBoard.isEmpty()){
-            throw new IllegalArgumentException("해당 게시글이 존재하지 않습니다.");
-        }
-        return ResponseEntity.ok(new BoardResponseDto(findBoard.get()));
+//    @Transactional(readOnly = true)
+    public StatusResponseDto<BoardResponseDto> findBoard(Long id){
+       BoardResponseDto boardResponseDto = new BoardResponseDto(boardRepository.findById(id).orElseThrow(()-> new IllegalArgumentException("Can not find board")));
+        return StatusResponseDto.success(boardResponseDto);
     }
 
     //선택 게시글 수정
-    public ResponseEntity<Object> updateBoard(Long id, BoardRequestDto requestDto, HttpServletRequest request){
+    @Transactional
+    public StatusResponseDto<BoardResponseDto> updateBoard(Long id, BoardRequestDto boardrequestDto, HttpServletRequest request){
         String token = jwtUtil.resolveToken(request);
         Claims claims;
 
         if(token != null){
             if (jwtUtil.validateToken(token)){
                 claims = jwtUtil.getUserInfoFromToken(token);
-            }else {
-                return ResponseEntity.badRequest().body(new StatusResponseDto(HttpStatus.BAD_REQUEST.value(), "토큰이 유효하지 않습니다."));
+                User user = userRepository.findByUsername(claims.getSubject()).orElseThrow(()-> new NullPointerException("Can not find User Info"));
+                Board board = boardRepository.findById(id).orElseThrow(()-> new IllegalArgumentException("It doesn't exist this board"));
+                if (user.getRole()== UserRoleEnum.ADMIN|| user.getUsername().equals(board.getUser().getUsername())){
+                    board.update(boardrequestDto);
+                    return StatusResponseDto.success(new BoardResponseDto(board));
+                }else {
+                    throw  new IllegalArgumentException("작성자만 수정가능합니다.");
+                }
             }
-            Optional<User> found = userRepository.findByUsername(claims.getSubject());
-            if(found.isEmpty()){
-                return ResponseEntity.badRequest().body(new StatusResponseDto(HttpStatus.BAD_REQUEST.value(), "해당 유저가 없습니다."));
-            }
-            Optional<Board> board = boardRepository.findByIdAndUserId(id, found.get().getId());
-            if (board.isEmpty()){
-                return ResponseEntity.badRequest().body(new StatusResponseDto(HttpStatus.BAD_REQUEST.value(), "유효하지 않은 게시물입니다."));
-            }
-            board.get().update(requestDto);
-            return ResponseEntity.ok(new BoardResponseDto(board.get()));
-        }else {
-            return ResponseEntity.badRequest().body(new StatusResponseDto(HttpStatus.BAD_REQUEST.value(), "토큰이 없습니다."));
         }
+        throw new IllegalArgumentException("토큰이 유효하지 않습니다");
     }
 
     //선택 게시글 삭제
-    public ResponseEntity<StatusResponseDto> removeBoard(Long id, HttpServletRequest req)  {
+    public StatusResponseDto<String> removeBoard(Long id, HttpServletRequest req) {
         String token = jwtUtil.resolveToken(req);
         Claims claims;
 
-        if(token != null){
-            if(jwtUtil.validateToken(token)){
+        if (token != null) {
+            if (jwtUtil.validateToken(token)) {
                 claims = jwtUtil.getUserInfoFromToken(token);
-            }else{
-                return ResponseEntity.badRequest().body(new StatusResponseDto(HttpStatus.BAD_REQUEST.value(), "토큰이 유효하지 않습니다."));
+                User user = userRepository.findByUsername(claims.getSubject()).orElseThrow(() -> new NullPointerException("Can not find User Info"));
+                Board board = boardRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("not exist"));
+                if (user.getRole() == UserRoleEnum.ADMIN || user.getUsername().equals(board.getUser().getUsername())) {
+                    boardRepository.deleteById(id);
+                } else {
+                    throw new IllegalArgumentException("작성자만 삭제가 가능합니다.");
+                }
+                return StatusResponseDto.success("delete success");
             }
-            Optional<User> found = userRepository.findByUsername(claims.getSubject());
-            if(found.isEmpty()){
-                return ResponseEntity.badRequest().body(new StatusResponseDto(HttpStatus.BAD_REQUEST.value(), "해당 유저가 없습니다."));
-            }
-            Optional<Board> findBoard = boardRepository.findByIdAndUserId(id, found.get().getId());
-            if (findBoard.isEmpty()){
-                return ResponseEntity.badRequest().body(new StatusResponseDto(HttpStatus.BAD_REQUEST.value(), "유효하지 않은 게시물입니다."));
-            }
-            boardRepository.delete(findBoard.get());
-            return ResponseEntity.ok(new StatusResponseDto(HttpStatus.OK.value(), "삭제 완료"));
-        }else {
-            return ResponseEntity.badRequest().body(new StatusResponseDto(HttpStatus.BAD_REQUEST.value(), "토큰이 없습니다."));
         }
+        throw new IllegalArgumentException("토큰이 유효하지 않습니다.");
     }
-
 }

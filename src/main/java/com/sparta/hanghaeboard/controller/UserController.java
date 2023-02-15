@@ -34,16 +34,13 @@ public class UserController {
 
     @ResponseBody
     @PostMapping("/signup")
-    public ResponseEntity<StatusResponseDto> signup(@Valid @RequestBody SignupRequestDto signupRequestDto, BindingResult result){
-        if(result.hasErrors()){
-            return ResponseEntity.badRequest().body(new StatusResponseDto(HttpStatus.BAD_REQUEST.value(), result.getFieldError().getDefaultMessage()));
-        }
+    public StatusResponseDto<String> signup(@Valid @RequestBody SignupRequestDto signupRequestDto){
         return userService.signup(signupRequestDto);
     }
 
     @ResponseBody
     @PostMapping("/login")
-    public ResponseEntity<StatusResponseDto> login(@RequestBody LoginRequestDto loginRequestDto){
+    public StatusResponseDto<String> login(@RequestBody LoginRequestDto loginRequestDto){
 
         return userService.login(loginRequestDto);
     }

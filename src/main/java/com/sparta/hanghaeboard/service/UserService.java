@@ -23,7 +23,7 @@ public class UserService {
     private  final JwtUtil jwtUtil;
 
     @Transactional
-    public ResponseEntity<StatusResponseDto> signup(SignupRequestDto signupRequestDto) {
+    public StatusResponseDto<String> signup(SignupRequestDto signupRequestDto) {
         Optional<User> found = userRepository.findByUsername(signupRequestDto.getUsername());
         //회원 중복 확인
         if(found.isPresent()){
@@ -35,30 +35,21 @@ public class UserService {
                 .build();
         userRepository.save(user);
 
-        return ResponseEntity.ok(new StatusResponseDto(HttpStatus.OK.value(), "success SignUp!"));
+        return  StatusResponseDto.success("success SignUp!") ;
     }
 
     @Transactional(readOnly = true)
-    public ResponseEntity<StatusResponseDto>login(LoginRequestDto loginRequestDto) {
+    public StatusResponseDto<String> login(LoginRequestDto loginRequestDto) {
         String username = loginRequestDto.getUsername();
         String password = loginRequestDto.getPassword();
 
         //사용자 확인
-        Optional<User> check = userRepository.findByUsername(username);
-        if (check.isEmpty()){
-            return exceptionResponse("유효하지 않은 사용자명입니다.");
-        } else if (!(check.get().getPassword().equals(password))) {
-            return exceptionResponse("비밀번호가 일치 하지 않습니다. ");
-        }
-        HttpHeaders headers = new HttpHeaders();
-        headers.add(JwtUtil.AUTHORIZATION_HEADER, jwtUtil.createToken(check.get().getUsername(), check.get().getRole()));
-        return ResponseEntity.ok()
-                .headers(headers)
-                .body(new StatusResponseDto(HttpStatus.OK.value(), "success Login!"));
+       User user = userRepository.findByUsername(username).orElseThrow(()-> new IllegalArgumentException("회원을 찾을 수 없습니다."));
+       if (!user.getPassword().equals(password)){
+           throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+       }
+        return StatusResponseDto.success(jwtUtil.createToken(user.getUsername(), user.getRole()));
     }
 
-    //공통 예외처리 가능
-    private ResponseEntity<StatusResponseDto> exceptionResponse(String message){
-        return  ResponseEntity.badRequest().body(new StatusResponseDto(HttpStatus.BAD_REQUEST.value(), message));
-    }
+
 }
