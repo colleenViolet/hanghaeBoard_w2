@@ -18,16 +18,19 @@ public class BoardController {
 
     private BoardService boardService;
 
+    //전체 게시글확인
     @GetMapping("/boards")
     public ResponseEntity<List<BoardResponseDto>> getBoards(){
         return boardService.findBoards();
     }
 
+    // 게시글 생성하기
     @PostMapping("/boards")
-    public ResponseEntity createdBoard(@RequestBody BoardRequestDto requestDto, HttpServletRequest request){
-        return boardService.createBoard(requestDto, request);
+    public ResponseEntity createdBoard(@RequestBody BoardRequestDto boardRequestDto, HttpServletRequest request){
+        return boardService.createBoard(boardRequestDto, request);
     }
 
+    //선택 게시글 확인
     @GetMapping("/board/{id}")
     public ResponseEntity<BoardResponseDto> getBoard(@PathVariable Long id){
         return boardService.findBoard(id);
