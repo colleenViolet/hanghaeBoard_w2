@@ -5,7 +5,6 @@ import com.sparta.hanghaeboard.dto.BoardResponseDto;
 import com.sparta.hanghaeboard.dto.StatusResponseDto;
 import com.sparta.hanghaeboard.service.BoardService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -16,7 +15,7 @@ import java.util.List;
 @RequestMapping("/api")
 public class BoardController {
 
-    private BoardService boardService;
+    private final BoardService boardService;
 
     //전체 게시글확인
     @GetMapping("/boards")

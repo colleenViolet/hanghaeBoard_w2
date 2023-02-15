@@ -23,7 +23,6 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class BoardService {
     private final BoardRepository boardRepository;
     private final UserRepository userRepository;
