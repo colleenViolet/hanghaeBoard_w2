@@ -8,18 +8,16 @@ import com.sparta.hanghaeboard.entity.User;
 import com.sparta.hanghaeboard.entity.UserRoleEnum;
 import com.sparta.hanghaeboard.jwt.JwtUtil;
 import com.sparta.hanghaeboard.repository.BoardRepository;
+import com.sparta.hanghaeboard.repository.CommentRepository;
 import com.sparta.hanghaeboard.repository.UserRepository;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +25,7 @@ public class BoardService {
     private final BoardRepository boardRepository;
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
+    private final CommentRepository commentRepository;
 
     //게시글 올리기
   public StatusResponseDto<BoardResponseDto> createBoard(BoardRequestDto boardRequestDto, HttpServletRequest request){

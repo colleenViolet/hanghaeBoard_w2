@@ -1,10 +1,13 @@
 package com.sparta.hanghaeboard.dto;
 
 import com.sparta.hanghaeboard.entity.Board;
+import com.sparta.hanghaeboard.entity.Comment;
 import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 public class BoardResponseDto {
@@ -15,6 +18,8 @@ public class BoardResponseDto {
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
 
+    private List<CommentResponseDto> commentResponseDtos = new ArrayList<>();
+
     @Builder
     public BoardResponseDto(Board board){
         this.id = board.getId();
@@ -23,5 +28,8 @@ public class BoardResponseDto {
         this.content = board.getContents();
         this.createdAt = board.getCreatedAt();
         this.modifiedAt = board.getModifiedAt();
+        for (Comment comment: board.getComments()){
+            this.commentResponseDtos.add(CommentResponseDto.from(comment));
+        }
     }
 }
