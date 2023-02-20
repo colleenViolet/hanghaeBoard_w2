@@ -1,7 +1,7 @@
 package com.sparta.hanghaeboard.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sparta.springthreeproject.security.dto.SecurityExceptionDto;
+import com.sparta.hanghaeboard.dto.SecurityExceptionDto;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

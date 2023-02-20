@@ -2,6 +2,12 @@ package com.sparta.hanghaeboard.security;
 
 import com.sparta.hanghaeboard.entity.User;
 import com.sparta.hanghaeboard.entity.UserRoleEnum;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import java.util.ArrayList;
+import java.util.Collection;
 
 public class UserDetailsImpl implements UserDetails {
 
@@ -9,10 +15,10 @@ public class UserDetailsImpl implements UserDetails {
     private final String username;
     private final String password;
 
-    public UserDetailsImpl(User user, String username, String password) {
+    public UserDetailsImpl(User user, String username) {
         this.user = user;
         this.username = username;
-        this.password = password;
+        this.password = user.getUsername();
     }
 
     public User getUser() {
