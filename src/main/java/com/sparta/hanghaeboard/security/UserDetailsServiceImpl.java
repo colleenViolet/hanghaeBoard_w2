@@ -22,7 +22,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
 
-        return (UserDetails) new UserDetailsImpl(user, user.getUsername());
+        return new UserDetailsImpl(user, user.getUsername());
     }
 
 }
