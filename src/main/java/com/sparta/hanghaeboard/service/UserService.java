@@ -35,13 +35,16 @@ public class UserService {
         return  StatusResponseDto.success("success SignUp!") ;
     }
 
-    @Transactional(readOnly = true)
+//    @Transactional(readOnly = true)
     public StatusResponseDto<String> login(LoginRequestDto loginRequestDto) {
         String username = loginRequestDto.getUsername();
         String password = loginRequestDto.getPassword();
 
         //사용자 확인
-       User user = userRepository.findByUsername(username).orElseThrow(()-> new IllegalArgumentException("회원을 찾을 수 없습니다."));
+       User user = userRepository.findByUsername(username).orElseThrow(
+               ()-> new IllegalArgumentException("회원을 찾을 수 없습니다.")
+       );
+
        if (!user.getPassword().equals(password)){
            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
        }
