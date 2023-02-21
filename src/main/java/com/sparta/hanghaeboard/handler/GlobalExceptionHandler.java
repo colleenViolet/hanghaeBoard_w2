@@ -2,6 +2,7 @@ package com.sparta.hanghaeboard.handler;
 
 import com.sparta.hanghaeboard.dto.StatusResponseDto;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -15,7 +16,7 @@ public class GlobalExceptionHandler {
         return StatusResponseDto.fail(500, ex.getMessage());
     }
 
-    @ExceptionHandler({IllegalAccessException.class, NullPointerException.class})
+    @ExceptionHandler({IllegalAccessException.class, NullPointerException.class, UsernameNotFoundException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public StatusResponseDto<?> handle(Exception ex){
         return StatusResponseDto.fail(400, ex.getMessage());

@@ -46,13 +46,13 @@ public class WebSecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.csrf().disable();
+        http.csrf().disable();// csrf 공격으로 일반적인 데이터를 포스팅 하는 게 403forbidden 에러 처리되는 것을 막는 코드
 
         // 기본 설정인 Session 방식은 사용하지 않고 JWT 방식을 사용하기 위한 설정
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
-        http.authorizeRequests().antMatchers("/auth/**").permitAll()
-                .antMatchers(HttpMethod.GET, "/board/**").permitAll()
+        http.authorizeRequests().antMatchers("/user/**").permitAll()
+                .antMatchers("/board/**").permitAll()
 //                .antMatchers("/api/shop").permitAll()
                 .anyRequest().authenticated()
                 // JWT 인증/인가를 사용하기 위한 설정
