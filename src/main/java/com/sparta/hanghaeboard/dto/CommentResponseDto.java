@@ -18,6 +18,7 @@ public class CommentResponseDto {
     private String username;
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
+    private int likeCount;
 
 
     public CommentResponseDto(Comment comment){
@@ -26,6 +27,7 @@ public class CommentResponseDto {
         this.username = comment.getUser().getUsername();
         this.createdAt = comment.getCreatedAt();
         this.modifiedAt = comment.getModifiedAt();
+        this.likeCount = comment.getLikes().size();
     }
 
     public static CommentResponseDto from(Comment comment){
@@ -35,6 +37,7 @@ public class CommentResponseDto {
                 .username(comment.getUser().getUsername())
                 .createdAt(comment.getCreatedAt())
                 .modifiedAt(comment.getModifiedAt())
+                .likeCount(comment.getLikes().size())
                 .build();
     }
 }

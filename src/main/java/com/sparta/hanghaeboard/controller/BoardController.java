@@ -3,8 +3,10 @@ package com.sparta.hanghaeboard.controller;
 import com.sparta.hanghaeboard.dto.BoardRequestDto;
 import com.sparta.hanghaeboard.dto.BoardResponseDto;
 import com.sparta.hanghaeboard.dto.StatusResponseDto;
+import com.sparta.hanghaeboard.security.UserDetailsImpl;
 import com.sparta.hanghaeboard.service.BoardService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -25,8 +27,8 @@ public class BoardController {
 
     // 게시글 생성하기
     @PostMapping("/boards")
-    public StatusResponseDto<BoardResponseDto> createdBoard(@RequestBody BoardRequestDto boardRequestDto, HttpServletRequest request){
-        return boardService.createBoard(boardRequestDto, request);
+    public StatusResponseDto<BoardResponseDto> createdBoard(@RequestBody BoardRequestDto boardRequestDto,  @AuthenticationPrincipal UserDetailsImpl userDetails){
+        return boardService.createBoard(boardRequestDto, userDetails);
     }
 
     //선택 게시글 확인
@@ -37,14 +39,20 @@ public class BoardController {
 
     //선택게시글 수정
     @PutMapping("/board/{id}")
-    public StatusResponseDto<BoardResponseDto> updateBoard(@PathVariable Long id, @RequestBody BoardRequestDto requestDto, HttpServletRequest req){
-        return boardService.updateBoard(id, requestDto,req);
+    public StatusResponseDto<BoardResponseDto> updateBoard(@PathVariable Long id, @RequestBody BoardRequestDto requestDto,  @AuthenticationPrincipal UserDetailsImpl userDetails){
+        return boardService.updateBoard(id, requestDto,userDetails);
     }
 
     //선택게시글 삭제
     @DeleteMapping("/board/{id}")
-    public StatusResponseDto<String> deleteBoard(@PathVariable Long id, HttpServletRequest req){
-        return boardService.removeBoard(id,req);
+    public StatusResponseDto<String> deleteBoard(@PathVariable Long id,  @AuthenticationPrincipal UserDetailsImpl userDetails){
+        return boardService.removeBoard(id,userDetails);
+    }
+
+    //선택 게시글 좋아요 구현
+    @PostMapping("/board/like/{id}")
+    public StatusResponseDto<String> likeBoard(@PathVariable Long id, @AuthenticationPrincipal UserDetailsImpl userDetails){
+        return boardService.likeBoard(id, userDetails);
     }
 }
 
