@@ -26,9 +26,9 @@ public class CommentService {
 
     private final CommentRepository commentRepository;
     private final BoardRepository boardRepository;
-    private final UserRepository userRepository;
-    private final JwtUtil jwtUtil;
-    private final Gson gson;
+//    private final UserRepository userRepository;
+//    private final JwtUtil jwtUtil;
+//    private final Gson gson;
     private final CommentLikeRepository commentLikeRepository;
 
     public StatusResponseDto<CommentResponseDto> createComment(Long id, String content, UserDetailsImpl userDetails) {
