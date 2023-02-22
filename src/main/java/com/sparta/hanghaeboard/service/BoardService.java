@@ -27,9 +27,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class BoardService {
     private final BoardRepository boardRepository;
-    private final UserRepository userRepository;
-    private final JwtUtil jwtUtil;
-    private final CommentRepository commentRepository;
     private final BoardLikeRepository boardLikeRepository;
 
     //게시글 올리기
@@ -53,7 +50,9 @@ public class BoardService {
     //선탹 게시글 조회
 //    @Transactional(readOnly = true)
     public StatusResponseDto<BoardResponseDto> findBoard(Long id) {
-        BoardResponseDto boardResponseDto = new BoardResponseDto(boardRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Can not find board")));
+        BoardResponseDto boardResponseDto = new BoardResponseDto(boardRepository.findById(id).orElseThrow(
+                () -> new IllegalArgumentException("Can not find board")
+        ));
         return StatusResponseDto.success(boardResponseDto);
     }
 
